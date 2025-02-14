@@ -161,10 +161,7 @@ class _CouponForSelfScreenState extends State<CouponForSelfScreen> {
   Future<void> sendRequest() async {
      try {
       ApiLoaded apistate = context.read<ApiCubit>().state as ApiLoaded;
-    context.read<OtpCubit>().fetchOtp(
-        apistate.apiResponse.token.employeeCode,
-        apistate.apiResponse.token.employeeMobile,
-        apistate.apiResponse.token.accessToken);
+   
       final response = await http.post(
         Uri.parse('https://ccapi.mahyco.com/api/CanteenVisits/addScanedQR'),
         headers: {

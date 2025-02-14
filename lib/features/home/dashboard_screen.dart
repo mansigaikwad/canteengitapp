@@ -193,7 +193,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           builder: (context) => const CouponForSelfScreen(),
                         ),
                       );
-                      // _handleScannedData(" canteen@mahyco ",context);
+                      // _handleScannedData(" canteen@mahyco ");
                       // Handle button 1 press
                     },
                   ),
@@ -234,7 +234,82 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   //testing code here
 
- 
+ bool _isLoading = false;
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+  }
+
+  void _hideLoadingDialog() {
+    Navigator.of(context).pop();
+  }
+
+  Future<void> _handleScannedData(String data) async {
+    // Add your logic to handle the scanned data
+    debugPrint('Scanned QR Code: $data');
+    // Send POST request with QR data
+    if(data==" canteen@mahyco "){
+      _showLoadingDialog();
+      sendRequest();
+    }else{
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Invalid QR Code'),
+          content: Text('Please scan a valid QR code.'),
+        ),
+      );
+    }
+    // You can navigate to another screen or show a dialog with the scanned data
+  }
+  Future<void> sendRequest() async {
+     try {
+      ApiLoaded apistate = context.read<ApiCubit>().state as ApiLoaded;
+    // context.read<OtpCubit>().fetchOtp(
+    //     apistate.apiResponse.token.employeeCode,
+    //     apistate.apiResponse.token.employeeMobile,
+    //     apistate.apiResponse.token.accessToken);
+      final response = await http.post(
+        Uri.parse('https://ccapi.mahyco.com/api/CanteenVisits/addScanedQR'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "Token": apistate.apiResponse.token.accessToken,
+          "EmployeeCode": apistate.apiResponse.token.employeeCode,
+          "Remark": "",
+          "SelfCount": 1,
+          "GuestCount": 0,
+          "CouponId": 1,
+          "VisitedDt": DateTime.now().toIso8601String(),
+          "VisitedTimeStamp": DateTime.now().toIso8601String(), 
+          "AppVersion": "1.14"
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint('Request successful');
+        print(response.body);
+        // Handle success response
+      } else {
+        debugPrint('Request failed with status: ${response.statusCode}');
+        // Handle error response
+      }
+      _hideLoadingDialog();
+    } catch (e) {
+      _hideLoadingDialog();
+      debugPrint('Error sending request: $e');
+      // Handle network/other errors
+    }
+  }
 
   //test code end here
 }
