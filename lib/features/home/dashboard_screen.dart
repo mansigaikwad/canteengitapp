@@ -19,7 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-   // checkForUpdates();
+   checkForUpdates();
   }
 
   Future<void> checkForUpdates() async {
